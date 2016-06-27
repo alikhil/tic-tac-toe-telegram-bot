@@ -13,6 +13,7 @@ from telegram import InlineQueryResultArticle, ParseMode, \
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler, CallbackQueryHandler, ChosenInlineResultHandler
 import logging
 
+import game
 from game import Game
 from emoji import Emoji
 
@@ -79,17 +80,17 @@ def handle_callback(bot, update):
     text = query.data
     game_id = update.callback_query.inline_message_id
     # game exists
-    game = None
+    game_ = None
     
     for i in range(len(games)):
         if games[i].id == game_id:
-            game = games[i]
+            game_ = games[i]
             break
 
-    if (game is not None) and (is_callback_valid(text)):
-        game.handle(text, update)
-        if (game.status == COMPLETED) or (game.status == FINISHED):
-            games.remove(game)
+    if (game_ is not None) and (is_callback_valid(text)):
+        game_.handle(text, update)
+        if (game_.status == game.COMPLETED) or (game_.status == game.FINISHED):
+            games.remove(game_)
     else:
         bot.answerCallbackQuery(query.id, text="Game is not exist :(( !")
     
