@@ -30,11 +30,11 @@ games = []
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Hi!')
+    bot.sendMessage(update.message.chat_id, text='Hi! Use inline query to create game.')
 
 
 def help(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Help!')
+    bot.sendMessage(update.message.chat_id, text='Use inline query to create game!')
 
 
 def get_initial_keyboard():
