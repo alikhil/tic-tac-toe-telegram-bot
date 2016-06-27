@@ -1,6 +1,8 @@
 import logging
 from telegram import InlineQueryResultArticle, ParseMode, \
-    InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton, Emoji
+    InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
+
+from emoji import Emoji
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
