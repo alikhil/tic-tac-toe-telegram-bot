@@ -6,13 +6,15 @@
 from uuid import uuid4
 
 import re
+import sys
 
 from telegram import InlineQueryResultArticle, ParseMode, \
     InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton, Emoji
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler, CallbackQueryHandler, ChosenInlineResultHandler
 import logging
+
 from game import Game
-import telegram.emoji
+from emoji import Emoji
 
 
 # Enable logging
@@ -94,8 +96,9 @@ def handle_callback(bot, update):
 def main():
     # Create the Updater and pass it your bot's token.
     logger.info('Bot started')
-
-    updater = Updater("203483979:AAGCq26gZcZnUbe65vzswLsRh_2lF1nqIA8")
+    test = "203483979:AAGCq26gZcZnUbe65vzswLsRh_2lF1nqIA8"
+    token = sys.argv[1] if len(sys.argv) == 2 else test
+    updater = Updater(token)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
