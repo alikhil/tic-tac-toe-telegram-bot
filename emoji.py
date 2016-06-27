@@ -1,5 +1,6 @@
+# Small custom emoji collection
 class Emoji:
 	"""UTF-8 emojis"""
-	CROSS = u'✖'
-	CIRCLE = u'⭕'
+	HEAVY_MULTIPLICATION_X = u'✖'
+	HEAVY_LARGE_CIRCLE = u'⭕'
 	LIKE = u'👍'
