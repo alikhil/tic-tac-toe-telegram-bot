@@ -88,7 +88,8 @@ def handle_callback(bot, update):
 
     if (game is not None) and (is_callback_valid(text)):
         game.handle(text, update)
-    
+        if (game.status == COMPLETED) or (game.status == FINISHED):
+            games.remove(game)
     else:
         bot.answerCallbackQuery(query.id, text="Game is not exist :(( !")
     
