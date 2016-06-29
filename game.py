@@ -196,7 +196,7 @@ class Game:
 				self.set_message(update.callback_query.inline_message_id, self.get_game_status())
 
 		else:
-			self.bot.show_message(update.callback_query.id, 'That cell is already played! Try another one.')
+			self.show_message(update.callback_query.id, 'That cell is already played! Try another one.')
 
 	def get_current_player(self):
 		
