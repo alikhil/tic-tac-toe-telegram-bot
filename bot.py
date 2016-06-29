@@ -36,6 +36,8 @@ def start(bot, update):
 def help(bot, update):
     bot.sendMessage(update.message.chat_id, text='Use inline query to create game!')
 
+def status(bot, update):
+    bot.sendMessage(update.message.chat_id, text=str(len(games)) + ' games running now')
 
 def get_initial_keyboard():
     player_x = InlineKeyboardButton('Play for ' + Emoji.HEAVY_MULTIPLICATION_X, callback_data='player_x')
@@ -92,7 +94,7 @@ def handle_callback(bot, update):
         if (game_.status == game.COMPLETED) or (game_.status == game.FINISHED):
             games.remove(game_)
     else:
-        bot.answerCallbackQuery(query.id, text="Game is not exist :(( !")
+        bot.answerCallbackQuery(query.id, text="Game does not exist :(( !")
     
 
 def main():
@@ -108,7 +110,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
-
+    dp.add_handler(CommandHandler('status', status))
     # on pressing buttons from inline keyboards
     dp.add_handler(CallbackQueryHandler(handle_callback))
     # on noncommand i.e message - echo the message on Telegram

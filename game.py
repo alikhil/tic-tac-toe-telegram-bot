@@ -211,12 +211,14 @@ class Game:
 
 		status += '\n'
 
+		play_word = ' plays' if self.status <= WAITING_FOR_PLAYER else ' played'
+
 		if self.player_x is not None:
-			status += self.player_x.username + ' plays for ' + \
+			status += self.player_x.name + play_word + ' for ' + \
 				Emoji.HEAVY_MULTIPLICATION_X + '\n'
 		
 		if self.player_o is not None:
-			status += self.player_o.username + ' plays for ' + \
+			status += self.player_o.name + play_word + ' for ' + \
 				Emoji.HEAVY_LARGE_CIRCLE + '\n'
 
 		if self.status == COMPLETED:
@@ -231,7 +233,6 @@ class Game:
 		map_ = [(i, self.map_[i]) for i in range(9)]
 		logger.info(map_)
 
-		#keyboard = InlineKeyboardMarkup([[make_button(map_[0])],[make_button(map_[1])]])
 
 		keyboard = InlineKeyboardMarkup([list(map(make_button, map_[:3])),
 			list(map(make_button, map_[3:6])),
