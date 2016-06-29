@@ -119,12 +119,11 @@ class Game:
 		
 
 		if self.players_count == 2:
-			# set message, get keyboard 
+
 			self.status = WAITING_FOR_PLAYER
 			self.set_message(inline_message_id,
 				self.get_game_status(),
 				self.get_map())
-			#self.set_keyboard(inline_message_id, self.get_map())
 
 		
 		elif self.players_count == 1:
@@ -189,14 +188,10 @@ class Game:
 				self.step += 1
 				self.status = COMPLETED
 				self.show_message(update.callback_query.id, 'Congratulations! You won!')
-				#self.set_message(update.callback_query.inline_message_id, self.get_game_status())
 			elif self.step == 9:
 				self.status = FINISHED
 				self.show_message(update.callback_query.id, 'Draw!')
-				#self.set_message(update.callback_query.inline_message_id, self.get_game_status())
 			
-				#self.set_message(update.callback_query.inline_message_id, self.get_game_status())
-			#self.set_keyboard(inline_message_id, self.get_map())
 			self.set_message(update.callback_query.inline_message_id, \
 							self.get_game_status(), self.get_map())
 
