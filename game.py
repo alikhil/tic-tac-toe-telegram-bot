@@ -5,7 +5,7 @@ from telegram import InlineQueryResultArticle, ParseMode, \
 from emoji import Emoji
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+                    level=logging.DEBUG)
 
 logger = logging.getLogger('Game')
 # game status constants
@@ -122,8 +122,9 @@ class Game:
 			# set message, get keyboard 
 			self.status = WAITING_FOR_PLAYER
 			self.set_message(inline_message_id,
-									 self.get_game_status())
-			self.set_keyboard(inline_message_id, self.get_map())
+				self.get_game_status(),
+				self.get_map())
+			#self.set_keyboard(inline_message_id, self.get_map())
 
 		
 		elif self.players_count == 1:
@@ -182,18 +183,22 @@ class Game:
 			self.map_[i] = val
 			self.step+=1
 			inline_message_id = update.callback_query.inline_message_id
-			self.set_keyboard(inline_message_id, self.get_map())
 			if self.is_completed(i):
 				self.step -= 1
 				self.winner = self.get_current_player()
 				self.step += 1
 				self.status = COMPLETED
 				self.show_message(update.callback_query.id, 'Congratulations! You won!')
-				self.set_message(update.callback_query.inline_message_id, self.get_game_status())
+				#self.set_message(update.callback_query.inline_message_id, self.get_game_status())
 			elif self.step == 9:
 				self.status = FINISHED
 				self.show_message(update.callback_query.id, 'Draw!')
-				self.set_message(update.callback_query.inline_message_id, self.get_game_status())
+				#self.set_message(update.callback_query.inline_message_id, self.get_game_status())
+			
+				#self.set_message(update.callback_query.inline_message_id, self.get_game_status())
+			#self.set_keyboard(inline_message_id, self.get_map())
+			self.set_message(update.callback_query.inline_message_id, \
+							self.get_game_status(), self.get_map())
 
 		else:
 			self.show_message(update.callback_query.id, 'That cell is already played! Try another one.')
@@ -220,6 +225,9 @@ class Game:
 		if self.player_o is not None:
 			status += self.player_o.name + play_word + ' for ' + \
 				Emoji.HEAVY_LARGE_CIRCLE + '\n'
+
+		if self.status == WAITING_FOR_PLAYER:
+			status += '\n' + self.get_current_player().name + '\'s turn. \n'
 
 		if self.status == COMPLETED:
 			status += '\n' + self.winner.name + ' won the round!'
@@ -260,11 +268,11 @@ class Game:
 
 		self.bot.answerCallbackQuery(query_id, message)
 
-	def set_message(self, message_id, message):
+	def set_message(self, message_id, message, keyboard=None):
 		logger.info('message_id:' + message_id)
 		logger.info('message:' + message)
 
-		self.bot.editMessageText(message, inline_message_id=message_id)
+		self.bot.editMessageText(message, inline_message_id=message_id, reply_markup=keyboard)
 
 class Player:
 	"""Player entity """
