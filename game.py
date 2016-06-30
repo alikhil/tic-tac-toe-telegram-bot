@@ -5,7 +5,7 @@ from telegram import InlineQueryResultArticle, ParseMode, \
 from emoji import Emoji
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 logger = logging.getLogger('Game')
 # game status constants
@@ -22,20 +22,31 @@ def make_button(button):
 		if button[1] == 0:
 			emoji = EMPTY
 
-		if button[1] == 'x':
+		if button[1] == 1:
 			emoji = Emoji.HEAVY_MULTIPLICATION_X
 
-		if button[1] == 'o':
+		if button[1] == 2:
 			emoji = Emoji.HEAVY_LARGE_CIRCLE
 
 		return InlineKeyboardButton(emoji, callback_data=str(button[0]))
 
 class Game:
 	"""Entity for game"""
-	def __init__(self, bot, update):
+	def __init__(self, bot, update, json=None):
+
+		self.bot = bot
+		if json is not None:
+			self.id = json['game_id']
+			self.status = int(json['status'])
+			self.players_count = int(json['players_count'])
+			self.step = int(json['step'])
+			self.map_ = [int(cell) for cell in json['map_']]
+			self.player_x = Player(update, json['player_x']) if json['player_x'] else None
+			self.player_o = Player(update, json['player_o']) if json['player_o'] else None
+			self.winner = Player(update, json['winner']) if json['winner'] else None
+			return
 
 		self.id = update.chosen_inline_result.inline_message_id
-		self.bot = bot
 		self.status = WAITING_FOR_START
 		self.players_count = 0
 		self.player_o = None
@@ -44,6 +55,8 @@ class Game:
 		self.map_ = [0] * 9
 		self.step = 0
 
+		
+
 	def handle(self, command, update):
 		# update - callback query update
 		query_id = update.callback_query.id
@@ -51,6 +64,7 @@ class Game:
 		logger.info('Handled command ' + command)
 
 		if self.status == WAITING_FOR_START:
+
 
 			if (command == 'player_x') and (self.find_player(update) is None):
 
@@ -144,7 +158,7 @@ class Game:
 
 
 	def set_keyboard(self, inline_message_id, keyboard):
-		logger.info(inline_message_id)
+
 		self.bot.editMessageReplyMarkup(reply_markup=keyboard, inline_message_id=inline_message_id)
 
 
@@ -178,7 +192,7 @@ class Game:
 	def try_to_make_step(self, cell, update):
 		i = int(cell)
 		if self.map_[i] == 0:
-			val = 'x' if self.get_current_player() == self.player_x else 'o'
+			val = 1 if self.get_current_player() == self.player_x else 2
 			self.map_[i] = val
 			self.step+=1
 			inline_message_id = update.callback_query.inline_message_id
@@ -234,14 +248,13 @@ class Game:
 
 	def get_map(self):
 		map_ = [(i, self.map_[i]) for i in range(9)]
-		logger.info(map_)
 
 
 		keyboard = InlineKeyboardMarkup([list(map(make_button, map_[:3])),
 			list(map(make_button, map_[3:6])),
 			list(map(make_button, map_[6:9]))])
 
-		logger.info(keyboard)
+		logger.debug('inline keyboard' + str(keyboard))
 		return keyboard
 
 	
@@ -264,15 +277,51 @@ class Game:
 		self.bot.answerCallbackQuery(query_id, message)
 
 	def set_message(self, message_id, message, keyboard=None):
-		logger.info('message_id:' + message_id)
-		logger.info('message:' + message)
+		logger.debug('message_id:' + message_id)
+		logger.info('setting message:' + message)
 
 		self.bot.editMessageText(message, inline_message_id=message_id, reply_markup=keyboard)
 
+
+	def to_json(self):
+
+		return dict(game_id=self.id,
+			status=self.status,
+			players_count=self.players_count,
+			map_=self.map_,
+			step=self.step,
+			player_x=self.json(self.player_x),
+			player_o=self.json(self.player_o),
+			winner=self.json(self.winner))
+	
+	def json(self, obj):
+		if obj is None:
+			return {}
+
+		return obj.to_json()
+
 class Player:
 	"""Player entity """
-	def __init__(self, update):
+	def __init__(self, update, json=None):
+
+		if json is not None:
+			if not json:
+				json = dict(player_id=-1,
+					name='not exist',
+					username='@alikhil')
+
+			self.id = json['player_id']
+			self.name = json['name']
+			self.username = json['username']
+			return
+
 		from_user = update.callback_query.from_user
 		self.id = from_user.id
 		self.name = from_user.first_name + ' ' + from_user.last_name
 		self.username = '@' + from_user.username
+
+	def to_json(self):
+
+		return dict(player_id=self.id,
+			name=self.name,
+			username=self.username)
