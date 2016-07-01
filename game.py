@@ -14,18 +14,18 @@ WAITING_FOR_START, WAITING_FOR_PLAYER, COMPLETED, FINISHED = range(0,4)
 STATUSES = ['Waiting for start.', 'Game is running.', 'Game is finished!', 'Game is finished!']
 
 EMPTY = ' '
-
+EMPTY_CELL, CELL_X, CELL_O = range(3)
 
 def make_button(button):
 
 		emoji = 'ERROR'
-		if button[1] == 0:
+		if button[1] == EMPTY_CELL:
 			emoji = EMPTY
 
-		if button[1] == 1:
+		if button[1] == CELL_X:
 			emoji = Emoji.HEAVY_MULTIPLICATION_X
 
-		if button[1] == 2:
+		if button[1] == CELL_O:
 			emoji = Emoji.HEAVY_LARGE_CIRCLE
 
 		return InlineKeyboardButton(emoji, callback_data=str(button[0]))
@@ -191,8 +191,8 @@ class Game:
 
 	def try_to_make_step(self, cell, update):
 		i = int(cell)
-		if self.map_[i] == 0:
-			val = 1 if self.get_current_player() == self.player_x else 2
+		if self.map_[i] == EMPTY_CELL:
+			val = CELL_X if self.get_current_player() == self.player_x else CELL_O
 			self.map_[i] = val
 			self.step+=1
 			inline_message_id = update.callback_query.inline_message_id
@@ -305,11 +305,6 @@ class Player:
 	def __init__(self, update, json=None):
 
 		if json is not None:
-			if not json:
-				json = dict(player_id=-1,
-					name='not exist',
-					username='@alikhil')
-
 			self.id = json['player_id']
 			self.name = json['name']
 			self.username = json['username']

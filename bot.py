@@ -21,7 +21,7 @@ from game import Game
 from emoji import Emoji
 
 #for some checking on go tests
-TEST = True
+TEST = False
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -76,11 +76,7 @@ def get_games_count():
     count = db.games.count({})
     return count
 
-# keeping all games here | TODO in database
-games = []
 
-# Define a few command handlers. These usually take the two arguments bot and
-# update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     bot.sendMessage(update.message.chat_id, text='Hi! Use inline query to create game.')
 
@@ -107,8 +103,7 @@ def is_callback_valid(callback_data):
     return False
 
 def chose_inline_result(bot, update):
-    #global games
-    #games.append(Game(bot, update))
+
     create_new_game(bot, update)
 
 def inlinequery(bot, update):
@@ -132,20 +127,12 @@ def handle_inline_callback(bot, update):
     user_id = query.from_user.id
     text = query.data
     game_id = update.callback_query.inline_message_id
-    # game exists
 
     game_ = find_game(game_id, bot, update)
-    
-    #for i in range(len(games)):
-    #    if games[i].id == game_id:
-    #        game_ = games[i]
-    #        break
 
     if (game_ is not None) and (is_callback_valid(text)):
         game_.handle(text, update)
         update_game(game_)
-        #if (game_.status == game.COMPLETED) or (game_.status == game.FINISHED):
-        #    games.remove(game_)
     else:
         bot.answerCallbackQuery(query.id, text="Game does not exist :(( !")
 
