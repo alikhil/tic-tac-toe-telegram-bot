@@ -11,7 +11,10 @@ logger = logging.getLogger('Game')
 # game status constants
 WAITING_FOR_START, WAITING_FOR_PLAYER, COMPLETED, FINISHED = range(0,4)
 
-STATUSES = ['Waiting for start.', 'Game is running.', 'Game is finished!', 'Game is finished!']
+STATUSES = ['Waiting for start.',
+            'Game is running.',
+            'Game is finished!',
+            'Game is finished!']
 
 EMPTY = ' '
 EMPTY_CELL, CELL_X, CELL_O = range(3)
@@ -55,7 +58,7 @@ class Game:
 		self.map_ = [0] * 9
 		self.step = 0
 
-		
+
 
 	def handle(self, command, update):
 		# update - callback query update
@@ -69,32 +72,32 @@ class Game:
 			if (command == 'player_x') and (self.find_player(update) is None):
 
 				self.chose_player(0, update)
-			
+
 			elif (command  == 'player_o') and (self.find_player(update) is None):
-			
+
 				self.chose_player(1, update)
-			
+
 			else:
 				self.show_message(query_id, 'You are already playing!')
 
 		elif self.status == WAITING_FOR_PLAYER:
 
 			if command.isdigit():
-				
+
 				player = self.find_player(update)
-			
+
 				if player == self.get_current_player():
-			
+
 					self.try_to_make_step(command, update)
-			
+
 				else:
 					self.show_message(query_id, 'Hey, it is not your turn!')
-			
+
 			else:
 				self.show_message(query_id, 'What are you trying to do?')
-		
+
 		elif self.status == FINISHED or self.status == COMPLETED:
-			
+
 			self.show_message(query_id, 'Game is finished!')
 
 
@@ -103,18 +106,18 @@ class Game:
 		query_id = update.callback_query.id
 		inline_message_id = update.callback_query.inline_message_id
 		if id == 0:
-			
+
 			if self.player_x is None:
-				
+
 				self.player_x = Player(update)
-				self.players_count += 1 
+				self.players_count += 1
 				self.show_message(query_id, 'Now you are playing for ' + Emoji.HEAVY_MULTIPLICATION_X)
 
 			else:
-				self.show_message(query_id, 
+				self.show_message(query_id,
 					'There is somebody who already plays for '  + \
 					Emoji.HEAVY_MULTIPLICATION_X)
-		
+
 		elif id == 1:
 
 			if self.player_o is None:
@@ -130,7 +133,7 @@ class Game:
 				 'There is somebody who already plays for ' \
 				  + Emoji.HEAVY_LARGE_CIRCLE)
 
-		
+
 
 		if self.players_count == 2:
 
@@ -139,27 +142,28 @@ class Game:
 				self.get_game_status(),
 				self.get_map())
 
-		
+
 		elif self.players_count == 1:
-			
+
 			player = None
 			if self.player_x is None:
 
 				player = InlineKeyboardButton('Play for ' + \
 					Emoji.HEAVY_MULTIPLICATION_X, callback_data='player_x')
 			else:
-				
+
 				player = InlineKeyboardButton('Play for ' + \
 					Emoji.HEAVY_LARGE_CIRCLE, callback_data=  'player_o')
-			
+
 			keyboard = InlineKeyboardMarkup([[player]])
-			
+
 			self.set_keyboard(inline_message_id, keyboard)
 
 
 	def set_keyboard(self, inline_message_id, keyboard):
 
-		self.bot.editMessageReplyMarkup(reply_markup=keyboard, inline_message_id=inline_message_id)
+		self.bot.editMessageReplyMarkup(reply_markup=keyboard,
+                                        inline_message_id=inline_message_id)
 
 
 	def is_completed(self, cell):
@@ -170,11 +174,11 @@ class Game:
 		y = cell % 3
 
 		logger.info(board)
-		#check if previous move caused a win on vertical line 
+		#check if previous move caused a win on vertical line
 		if board[0][y] == board[1][y] == board [2][y]:
 			return True
 
-		#check if previous move caused a win on horizontal line 
+		#check if previous move caused a win on horizontal line
 		if board[x][0] == board[x][1] == board [x][2]:
 			return True
 
@@ -185,8 +189,8 @@ class Game:
 	    #check if previous move was on the secondary diagonal and caused a win
 		if x + y == 2 and board[0][2] == board[1][1] == board [2][0]:
 			return True
-		
-		return False      
+
+		return False
 
 
 	def try_to_make_step(self, cell, update):
@@ -205,7 +209,7 @@ class Game:
 			elif self.step == 9:
 				self.status = FINISHED
 				self.show_message(update.callback_query.id, 'Draw!')
-			
+
 			self.set_message(update.callback_query.inline_message_id, \
 							self.get_game_status(), self.get_map())
 
@@ -213,7 +217,7 @@ class Game:
 			self.show_message(update.callback_query.id, 'That cell is already played! Try another one.')
 
 	def get_current_player(self):
-		
+
 		if self.step % 2 == 0:
 			return self.player_x
 
@@ -230,7 +234,7 @@ class Game:
 		if self.player_x is not None:
 			status += self.player_x.name + play_word + ' for ' + \
 				Emoji.HEAVY_MULTIPLICATION_X + '\n'
-		
+
 		if self.player_o is not None:
 			status += self.player_o.name + play_word + ' for ' + \
 				Emoji.HEAVY_LARGE_CIRCLE + '\n'
@@ -240,7 +244,7 @@ class Game:
 
 		if self.status == COMPLETED:
 			status += '\n' + self.winner.name + ' won the round!'
-		
+
 		if self.status == FINISHED:
 			status += '\n Draw!'
 		return status
@@ -257,15 +261,15 @@ class Game:
 		logger.debug('inline keyboard' + str(keyboard))
 		return keyboard
 
-	
+
 
 	def find_player(self, update):
-		
+
 		user_id = update.callback_query.from_user.id
 
 		if (self.player_o is not None) and (self.player_o.id == user_id):
 			return self.player_o
-		
+
 		if (self.player_x is not None) and (self.player_x.id == user_id):
 			return self.player_x
 
@@ -293,7 +297,7 @@ class Game:
 			player_x=self.json(self.player_x),
 			player_o=self.json(self.player_o),
 			winner=self.json(self.winner))
-	
+
 	def json(self, obj):
 		if obj is None:
 			return {}

@@ -38,7 +38,7 @@ def clear():
 #clear()
 
 def create_new_game(bot, update):
-    
+
     game = Game(bot, update)
     result = db.games.insert(game.to_json())
 
@@ -48,10 +48,11 @@ def create_new_game(bot, update):
 
 def find_game(game_id, bot, update):
 
-    result = db.games.find_one( { "game_id" : game_id }) 
-    
+    result = db.games.find_one( { "game_id" : game_id })
+
     if TEST:
-        logger.debug('While searching for game with id %s we found: %s', game_id, str(result))
+        logger.debug('While searching for game with id %s we found: %s', \
+            game_id, str(result))
 
     if result is None:
         return None
@@ -62,7 +63,8 @@ def find_game(game_id, bot, update):
 
 def update_game(game):
 
-    result = db.games.find_one_and_replace({ "game_id" :  game.id }, game.to_json())
+    result = db.games.find_one_and_replace({ "game_id" :  game.id },\
+        game.to_json())
     if TEST:
         logger.debug('after update we get %s', str(result))
 
@@ -77,18 +79,21 @@ def get_games_count():
     return count
 
 
-def start(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Hi! Use inline query to create game.')
+def start_or_help(bot, update):
+    bot.sendMessage(update.message.chat_id, text='Hi! Use inline query to\
+                create game.')
 
-def help(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Use inline query to create game!')
 
 def status(bot, update):
-    bot.sendMessage(update.message.chat_id, text=str(get_games_in_progress_count()) + ' games running now.\nTotal number of games - ' + str(get_games_count()))
+    bot.sendMessage(update.message.chat_id, \
+        text=str(get_games_in_progress_count()) + \
+        ' games running now.\nTotal number of games - ' + str(get_games_count()))
 
 def get_initial_keyboard():
-    player_x = InlineKeyboardButton('Play for ' + Emoji.HEAVY_MULTIPLICATION_X, callback_data='player_x')
-    player_o = InlineKeyboardButton('Play for ' + Emoji.HEAVY_LARGE_CIRCLE, callback_data=  'player_o')
+    player_x = InlineKeyboardButton('Play for ' + Emoji.HEAVY_MULTIPLICATION_X, \
+                                    callback_data='player_x')
+    player_o = InlineKeyboardButton('Play for ' + Emoji.HEAVY_LARGE_CIRCLE, \
+                                    callback_data=  'player_o')
     return InlineKeyboardMarkup([[player_x],[player_o]])
 
 def is_callback_valid(callback_data):
@@ -97,9 +102,10 @@ def is_callback_valid(callback_data):
     if (callback_data == 'player_x') or (callback_data == 'player_o'):
         return True
 
-    if (len(callback_data) == 1) and (callback_data.isdigit()) and (callback_data != '9'):
+    if (len(callback_data) == 1) and (callback_data.isdigit()) and \
+       (callback_data != '9'):
         return True
-    
+
     return False
 
 def chose_inline_result(bot, update):
@@ -111,7 +117,7 @@ def inlinequery(bot, update):
     results = list()
 
     results.append(InlineQueryResultArticle(id=uuid4(),
-                                            title='Create Tic-Tac-Toe round.',
+                                            title='Create Tic-Tac-Toe 3x3 round.',
                                             input_message_content=InputTextMessageContent('Tic-Tac-Toe round created!'),
                                             reply_markup=get_initial_keyboard()))
 
@@ -148,8 +154,8 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("start", start_or_help))
+    dp.add_handler(CommandHandler("help", start_or_help))
     dp.add_handler(CommandHandler('status', status))
     # on pressing buttons from inline keyboards
     dp.add_handler(CallbackQueryHandler(handle_inline_callback))
