@@ -1,4 +1,6 @@
 # tic-tac-toe-telegram-bot
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/082cd4c72c584321b1f6c9322514afa6)](https://www.codacy.com/app/TBM-Team/tic-tac-toe-telegram-bot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=alikhil/tic-tac-toe-telegram-bot&amp;utm_campaign=Badge_Grade)
+
 Simple classic implemetation of Tic-Tac-Toe game, powered by [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot). 
 
 ## Installation
