@@ -1,5 +1,5 @@
 import logging
-from telegram import InlineQueryResultArticle, ParseMode, \
+from telegram import InlineQueryResultArticle, \
     InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
 
 from emoji import Emoji
@@ -189,7 +189,6 @@ class Game:
 	    #check if previous move was on the secondary diagonal and caused a win
 		if x + y == 2 and board[0][2] == board[1][1] == board [2][0]:
 			return True
-
 		return False
 
 

@@ -5,13 +5,11 @@
 # This program is dedicated to the public domain under the CC0 license.
 from uuid import uuid4
 
-import re
 import sys
-import pymongo
 from pymongo.mongo_client import MongoClient
 
-from telegram import InlineQueryResultArticle, ParseMode, \
-    InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton, Emoji
+from telegram import InlineQueryResultArticle,  \
+    InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, InlineQueryHandler, CommandHandler, \
     CallbackQueryHandler, ChosenInlineResultHandler
 import logging
@@ -38,7 +36,6 @@ def clear():
 #clear()
 
 def create_new_game(bot, update):
-
     game = Game(bot, update)
     result = db.games.insert(game.to_json())
 
@@ -113,9 +110,8 @@ def chose_inline_result(bot, update):
     create_new_game(bot, update)
 
 def inlinequery(bot, update):
-    query = update.inline_query.query
     results = list()
-
+    
     results.append(InlineQueryResultArticle(id=uuid4(),
                                             title='Create Tic-Tac-Toe 3x3 round.',
                                             input_message_content=InputTextMessageContent('Tic-Tac-Toe round created!'),
@@ -130,7 +126,6 @@ def error(bot, update, error):
 def handle_inline_callback(bot, update):
     logger.debug('handle a inline callback' + str(update))
     query = update.callback_query
-    user_id = query.from_user.id
     text = query.data
     game_id = update.callback_query.inline_message_id
 
