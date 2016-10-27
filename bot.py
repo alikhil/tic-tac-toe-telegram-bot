@@ -77,8 +77,10 @@ def get_games_count():
     return count
 
 def get_playing_users_count():
-    x_players = Set(db.games.distinct("player_x"))
-    o_players = Set(db.games.distinct("player_o"))
+    x_p = filter(lambda x: 'player_id' in x, db.games.distinct('player_x'))
+    o_p = filter(lambda y: 'player_id' in y, db.games.distinct('player_0'))
+    x_players = Set(map(lambda g: g['player_id'], x_p))
+    o_players = Set(map(lambda g: g['player_id'], o_p))
     return len(x_players | o_players)
 
 def start_or_help(bot, update):
@@ -89,8 +91,8 @@ def start_or_help(bot, update):
 def status(bot, update):
     bot.sendMessage(update.message.chat_id, \
         text=str(get_games_in_progress_count()) + \
-        ' games running now.\nTotal number of games - ' + str(get_games_count()) + '.'\
-        str(get_playing_users_count()) + ' players.');
+        ' games running now.\nTotal number of games - ' + str(get_games_count()) + \
+        '.\n' + str(get_playing_users_count()) + ' players.');
 
 def get_initial_keyboard():
     player_x = InlineKeyboardButton('Play for ' + Emoji.HEAVY_MULTIPLICATION_X, \
