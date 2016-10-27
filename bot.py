@@ -17,6 +17,7 @@ import logging
 import game
 from game import Game
 from emoji import Emoji
+from sets import Set
 
 #for some checking on go tests
 TEST = False
@@ -75,6 +76,10 @@ def get_games_count():
     count = db.games.count({})
     return count
 
+def get_playing_users_count():
+    x_players = Set(db.games.distinct("player_x"))
+    o_players = Set(db.games.distinct("player_o"))
+    return len(x_players | o_players)
 
 def start_or_help(bot, update):
     bot.sendMessage(update.message.chat_id, text='Hi! Use inline query to\
@@ -84,7 +89,8 @@ def start_or_help(bot, update):
 def status(bot, update):
     bot.sendMessage(update.message.chat_id, \
         text=str(get_games_in_progress_count()) + \
-        ' games running now.\nTotal number of games - ' + str(get_games_count()))
+        ' games running now.\nTotal number of games - ' + str(get_games_count()) + '.'\
+        str(get_playing_users_count()) + ' players.');
 
 def get_initial_keyboard():
     player_x = InlineKeyboardButton('Play for ' + Emoji.HEAVY_MULTIPLICATION_X, \
