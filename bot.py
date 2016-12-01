@@ -19,37 +19,42 @@ from game import Game
 from emoji import Emoji
 from sets import Set
 
-#for some checking on go tests
+# for some checking on go tests
 TEST = False
 
 # Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 client = MongoClient('mongodb://127.0.0.1:31337')
 db = client.tictactoe
 
+
 def clear():
     db.games.remove({})
 
-#clear()
+# clear()
+
 
 def create_new_game(bot, update):
     game = Game(bot, update)
     result = db.games.insert(game.to_json())
 
     if TEST:
-        results = db.games.find({"_id" : result})
+        results = db.games.find({"_id": result})
         logger.debug('AFter creating Heuston we found %s in db', str(results))
+
 
 def find_game(game_id, bot, update):
 
-    result = db.games.find_one( { "game_id" : game_id })
+    result = db.games.find_one({"game_id": game_id})
 
     if TEST:
-        logger.debug('While searching for game with id %s we found: %s', \
+        logger.debug(
+            'While searching for game with id %s we found: %s',
             game_id, str(result))
 
     if result is None:
@@ -61,20 +66,24 @@ def find_game(game_id, bot, update):
 
 def update_game(game):
 
-    result = db.games.find_one_and_replace({ "game_id" :  game.id },\
+    result = db.games.find_one_and_replace(
+        {"game_id": game.id},
         game.to_json())
+
     if TEST:
         logger.debug('after update we get %s', str(result))
 
 
 def get_games_in_progress_count():
 
-    count = db.games.count({'status' : { '$lte' : game.WAITING_FOR_PLAYER}})
+    count = db.games.count({'status': {'$lte': game.WAITING_FOR_PLAYER}})
     return count
+
 
 def get_games_count():
     count = db.games.count({})
     return count
+
 
 def get_playing_users_count():
     x_p = filter(lambda x: 'player_id' in x, db.games.distinct('player_x'))
@@ -83,23 +92,32 @@ def get_playing_users_count():
     o_players = Set(map(lambda g: g['player_id'], o_p))
     return len(x_players | o_players)
 
+
 def start_or_help(bot, update):
     bot.sendMessage(update.message.chat_id, text='Hi! Use inline query to\
                 create game.')
 
 
 def status(bot, update):
-    bot.sendMessage(update.message.chat_id, \
-        text=str(get_games_in_progress_count()) + \
-        ' games running now.\nTotal number of games - ' + str(get_games_count()) + \
-        '.\n' + str(get_playing_users_count()) + ' players.');
+
+    bot.sendMessage(
+        update.message.chat_id,
+        text=str(get_games_in_progress_count()) +
+        ' games running now.\nTotal number of games - ' +
+        str(get_games_count()) +
+        '.\n' + str(get_playing_users_count()) + ' players.')
+
 
 def get_initial_keyboard():
-    player_x = InlineKeyboardButton('Play for ' + Emoji.HEAVY_MULTIPLICATION_X, \
-                                    callback_data='player_x')
-    player_o = InlineKeyboardButton('Play for ' + Emoji.HEAVY_LARGE_CIRCLE, \
-                                    callback_data=  'player_o')
-    return InlineKeyboardMarkup([[player_x],[player_o]])
+
+    player_x = InlineKeyboardButton(
+        'Play for ' + Emoji.HEAVY_MULTIPLICATION_X,
+        callback_data='player_x')
+    player_o = InlineKeyboardButton(
+        'Play for ' + Emoji.HEAVY_LARGE_CIRCLE,
+        callback_data='player_o')
+    return InlineKeyboardMarkup([[player_x], [player_o]])
+
 
 def is_callback_valid(callback_data):
     """Checking callback validity"""
@@ -113,23 +131,27 @@ def is_callback_valid(callback_data):
 
     return False
 
+
 def chose_inline_result(bot, update):
 
     create_new_game(bot, update)
 
+
 def inlinequery(bot, update):
     results = list()
-    
-    results.append(InlineQueryResultArticle(id=uuid4(),
-                                            title='Create Tic-Tac-Toe 3x3 round.',
-                                            input_message_content=InputTextMessageContent('Tic-Tac-Toe round created!'),
-                                            reply_markup=get_initial_keyboard()))
+
+    results.append(InlineQueryResultArticle(
+        id=uuid4(),
+        title='Create Tic-Tac-Toe 3x3 round.',
+        input_message_content=InputTextMessageContent('Tic-Tac-Toe round created!'),
+        reply_markup=get_initial_keyboard()))
 
     bot.answerInlineQuery(update.inline_query.id, results=results)
 
 
 def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
+
 
 def handle_inline_callback(bot, update):
     logger.debug('handle a inline callback' + str(update))
