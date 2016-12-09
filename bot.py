@@ -137,6 +137,14 @@ def chose_inline_result(bot, update):
     create_new_game(bot, update)
 
 
+def rate(bot, update):
+
+    bot.sendMessage(
+        update.message.chat_id,
+        text="⭐️ If you like the bot, please [rate and give feedback]\
+        (https://telegram.me/storebot?start=tictoetac_bot). ⭐️")
+
+
 def inlinequery(bot, update):
     results = list()
 
@@ -182,6 +190,7 @@ def main():
     dp.add_handler(CommandHandler("start", start_or_help))
     dp.add_handler(CommandHandler("help", start_or_help))
     dp.add_handler(CommandHandler('status', status))
+    dp.add_handler(CommandHandler("rate"), rate)
     # on pressing buttons from inline keyboards
     dp.add_handler(CallbackQueryHandler(handle_inline_callback))
     # on noncommand i.e message - echo the message on Telegram
