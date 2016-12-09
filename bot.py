@@ -190,7 +190,7 @@ def main():
     dp.add_handler(CommandHandler("start", start_or_help))
     dp.add_handler(CommandHandler("help", start_or_help))
     dp.add_handler(CommandHandler('status', status))
-    dp.add_handler(CommandHandler("rate"), rate)
+    dp.add_handler(CommandHandler("rate", rate))
     # on pressing buttons from inline keyboards
     dp.add_handler(CallbackQueryHandler(handle_inline_callback))
     # on noncommand i.e message - echo the message on Telegram
