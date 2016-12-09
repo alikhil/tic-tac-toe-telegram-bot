@@ -141,8 +141,7 @@ def rate(bot, update):
 
     bot.sendMessage(
         update.message.chat_id,
-        text="⭐️ If you like the bot, please [rate and give feedback]\
-        (https://telegram.me/storebot?start=tictoetac_bot). ⭐️")
+        text="⭐️ If you like the bot, please [rate and give feedback](https://telegram.me/storebot?start=tictoetac_bot). ⭐️", parse_mode="Markdown")
 
 
 def inlinequery(bot, update):
