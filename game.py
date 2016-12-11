@@ -284,10 +284,7 @@ class Game:
         keyboard = InlineKeyboardMarkup(
             [list(map(make_button, map_[:3])),
                 list(map(make_button, map_[3:6])),
-                list(map(make_button, map_[6:9])),
-                [InlineKeyboardButton(
-                    'Notify ' + self.get_current_player().name,
-                    'notify')]])
+                list(map(make_button, map_[6:9]))])
 
         logger.debug('inline keyboard' + str(keyboard))
         return keyboard
