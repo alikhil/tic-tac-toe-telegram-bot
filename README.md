@@ -10,6 +10,10 @@ cd tic-tac-toe-telegram-bot
 pip install -r requirements.txt
 </code></pre>
 
+Ensure that you have installed MongoDB in your machine.
+
+Replace connection url in `bot.py` file in line `client = MongoClient('mongodb://127.0.0.1:31337')`
+
 ## Running
 
 <pre><code>python bot.py TOKEN
