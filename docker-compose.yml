@@ -1,0 +1,14 @@
+version: "3"
+services:
+  mongo:
+    image: mongo:latest
+    restart: on-failure
+  bot:
+    # build from scratch or use my image
+    build:
+      context: .
+    # image: alikhil/tic-tac-toe-telegram-bot:0.1
+    environment:
+      TOKEN: <YOUR_TELEGRAM_BOT_TOKEN>
+  
+    restart: on-failure
