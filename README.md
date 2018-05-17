@@ -3,21 +3,18 @@
 
 Simple classic implemetation of Tic-Tac-Toe game, powered by [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot). 
 
-## Installation
-<pre><code>git clone git@github.com:alikhil/tic-tac-toe-telegram-bot.git
+## Quickstart with docker
+
+```git clone git@github.com:alikhil/tic-tac-toe-telegram-bot.git
 
 cd tic-tac-toe-telegram-bot
-pip install -r requirements.txt
-</code></pre>
 
-Ensure that you have installed MongoDB in your machine.
+# Set your bot token in docker-compose.yml file
 
-Replace connection url in `bot.py` file in line `client = MongoClient('mongodb://127.0.0.1:31337')`
+docker-compose up -d
 
-## Running
+```
 
-<pre><code>python bot.py TOKEN
-</code></pre>
 
 ## How to play
 To play use [inline](https://core.telegram.org/bots/inline) query [@tictoetac_bot](https://telegram.me/tictoetac_bot). 
