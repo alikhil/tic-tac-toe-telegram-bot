@@ -5,14 +5,15 @@ Simple classic implemetation of Tic-Tac-Toe game, powered by [python-telegram-bo
 
 ## Quickstart with docker
 
-```git clone git@github.com:alikhil/tic-tac-toe-telegram-bot.git
+```bash
+
+git clone git@github.com:alikhil/tic-tac-toe-telegram-bot.git
 
 cd tic-tac-toe-telegram-bot
 
 # Set your bot token in docker-compose.yml file
 
 docker-compose up -d
-
 ```
 
 

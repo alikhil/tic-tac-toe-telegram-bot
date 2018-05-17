@@ -193,7 +193,7 @@ def handle_inline_callback(bot, update):
 def main():
     # Create the Updater and pass it your bot's token.
     logger.info('Bot started')
-    test = "203483979:AAGCq26gZcZnUbe65vzswLsRh_2lF1nqIA8"
+    test = "YOUR_BOT_TOKEN"
     token = env["TOKEN"] if "TOKEN" in env else test
     updater = Updater(token)
 
