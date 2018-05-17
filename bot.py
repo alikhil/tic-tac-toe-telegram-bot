@@ -6,6 +6,8 @@
 from uuid import uuid4
 
 import sys
+from os import environ
+
 from pymongo.mongo_client import MongoClient
 
 from telegram import InlineQueryResultArticle,  \
@@ -19,17 +21,24 @@ from game import Game
 from emoji import Emoji
 from sets import Set
 
+
+
+env = environ.copy()
+
 # for some checking on go tests
-TEST = False
+TEST = True
 
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+    level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
-client = MongoClient('mongodb://127.0.0.1:31337')
+murl = env.get('MONGO', 'mongo:27017')
+
+client = MongoClient('mongodb://' + murl)
+
 db = client.tictactoe
 
 
@@ -134,7 +143,9 @@ def is_callback_valid(callback_data):
 
 def chose_inline_result(bot, update):
 
+    logger.info("creating game")
     create_new_game(bot, update)
+
 
 
 def rate(bot, update):
@@ -167,6 +178,10 @@ def handle_inline_callback(bot, update):
     game_id = update.callback_query.inline_message_id
 
     game_ = find_game(game_id, bot, update)
+    # logger.debug('query: ' + json.dumps(query.__dict__))
+    # logger.info('text: ' + text)
+    # logger.info('gameId: ' + game_id)
+    # logger.info('game_ is None: ' + str(game_ is None))
 
     if (game_ is not None) and (is_callback_valid(text)):
         game_.handle(text, update)
@@ -179,7 +194,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     logger.info('Bot started')
     test = "203483979:AAGCq26gZcZnUbe65vzswLsRh_2lF1nqIA8"
-    token = sys.argv[1] if len(sys.argv) == 2 else test
+    token = env["TOKEN"] if "TOKEN" in env else test
     updater = Updater(token)
 
     # Get the dispatcher to register handlers
