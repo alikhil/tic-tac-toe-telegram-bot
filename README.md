@@ -17,7 +17,7 @@ docker-compose up -d
 
 ## How to play
 
-To play use [inline](https://core.telegram.org/bots/inline) query [@tictoetac_bot](https://telegram.me/tictoetac_bot).
+To play use [inline](https://core.telegram.org/bots/inline) query [@tictoetac_bot](https://t.me/tictoetac_bot).
 
 ![image](https://cloud.githubusercontent.com/assets/7482065/16517615/0fc8f0ce-3f87-11e6-9d95-f96da4cf146c.png)
 
