@@ -11,15 +11,14 @@ from os import environ
 from pymongo.mongo_client import MongoClient
 
 from telegram import InlineQueryResultArticle,  \
-    InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Updater, InlineQueryHandler, CommandHandler, \
-    CallbackQueryHandler, ChosenInlineResultHandler
+    InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton, Update
+from telegram.ext import ApplicationBuilder, InlineQueryHandler, CommandHandler, \
+    CallbackQueryHandler, ChosenInlineResultHandler, CallbackContext
 import logging
 
 import game
 from game import Game
 from emoji import Emoji
-from sets import Set
 
 
 
@@ -50,7 +49,7 @@ def clear():
 
 def create_new_game(bot, update):
     game = Game(bot, update)
-    result = db.games.insert(game.to_json())
+    result = db.games.insert_one(game.to_json())
 
     if TEST:
         results = db.games.find({"_id": result})
@@ -85,31 +84,30 @@ def update_game(game):
 
 def get_games_in_progress_count():
 
-    count = db.games.count({'status': {'$lte': game.WAITING_FOR_PLAYER}})
+    count = db.games.count_documents({'status': {'$lte': game.WAITING_FOR_PLAYER}})
     return count
 
 
 def get_games_count():
-    count = db.games.count({})
+    count = db.games.count_documents({})
     return count
 
 
 def get_playing_users_count():
     x_p = filter(lambda x: 'player_id' in x, db.games.distinct('player_x'))
     o_p = filter(lambda y: 'player_id' in y, db.games.distinct('player_0'))
-    x_players = Set(map(lambda g: g['player_id'], x_p))
-    o_players = Set(map(lambda g: g['player_id'], o_p))
+    x_players = set(map(lambda g: g['player_id'], x_p))
+    o_players = set(map(lambda g: g['player_id'], o_p))
     return len(x_players | o_players)
 
 
-def start_or_help(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Hi! Use inline query to\
-                create game.')
+async def start_or_help(update: Update, context: CallbackContext):
+    await context.bot.sendMessage(update.message.chat_id, text='Hi! \nType @tictoetac_bot in any chat and select the game you want to play.' )
 
 
-def status(bot, update):
+async def status(update: Update, context: CallbackContext):
 
-    bot.sendMessage(
+    await context.bot.sendMessage(
         update.message.chat_id,
         text=str(get_games_in_progress_count()) +
         ' games running now.\nTotal number of games - ' +
@@ -141,21 +139,22 @@ def is_callback_valid(callback_data):
     return False
 
 
-def chose_inline_result(bot, update):
+async def chose_inline_result(update: Update, context: CallbackContext):
 
     logger.info("creating game")
-    create_new_game(bot, update)
+    create_new_game(context.bot, update)
 
 
 
-def rate(bot, update):
+async def rate(update: Update, context: CallbackContext):
 
-    bot.sendMessage(
+    await context.bot.sendMessage(
         update.message.chat_id,
-        text="⭐️ If you like the bot, please [rate and give feedback](https://telegram.me/storebot?start=tictoetac_bot). ⭐️", parse_mode="Markdown")
+        text="⭐️ If you like the bot, please [give a star](https://github.com/alikhil/tic-tac-toe-telegram-bot/). ⭐️",
+        parse_mode="Markdown")
 
 
-def inlinequery(bot, update):
+async def inline_query_callback(update: Update, context: CallbackContext):
     results = list()
 
     results.append(InlineQueryResultArticle(
@@ -164,30 +163,30 @@ def inlinequery(bot, update):
         input_message_content=InputTextMessageContent('Tic-Tac-Toe round created!'),
         reply_markup=get_initial_keyboard()))
 
-    bot.answerInlineQuery(update.inline_query.id, results=results)
+    await context. bot.answerInlineQuery(update.inline_query.id, results=results)
 
 
-def error(bot, update, error):
-    logger.warn('Update "%s" caused error "%s"' % (update, error))
+def error(update: Update, context: CallbackContext):
+    logger.warning('Update "%s" caused error "%s"' % (update, error))
 
 
-def handle_inline_callback(bot, update):
+async def handle_inline_callback(update: Update, context: CallbackContext):
     logger.debug('handle a inline callback' + str(update))
     query = update.callback_query
     text = query.data
     game_id = update.callback_query.inline_message_id
 
-    game_ = find_game(game_id, bot, update)
+    game_ = find_game(game_id, context.bot, update)
     # logger.debug('query: ' + json.dumps(query.__dict__))
     # logger.info('text: ' + text)
     # logger.info('gameId: ' + game_id)
     # logger.info('game_ is None: ' + str(game_ is None))
 
     if (game_ is not None) and (is_callback_valid(text)):
-        game_.handle(text, update)
+        await game_.handle(text, update)
         update_game(game_)
     else:
-        bot.answerCallbackQuery(query.id, text="Game does not exist :(( !")
+        await context.bot.answerCallbackQuery(query.id, text="Game does not exist :(( !")
 
 
 def main():
@@ -195,33 +194,23 @@ def main():
     logger.info('Bot started')
     test = "YOUR_BOT_TOKEN"
     token = env["TOKEN"] if "TOKEN" in env else test
-    updater = Updater(token)
-
-    # Get the dispatcher to register handlers
-    dp = updater.dispatcher
-
+    app = ApplicationBuilder().token(token).build()
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start_or_help))
-    dp.add_handler(CommandHandler("help", start_or_help))
-    dp.add_handler(CommandHandler('status', status))
-    dp.add_handler(CommandHandler("rate", rate))
+    app.add_handler(CommandHandler("start", start_or_help))
+    app.add_handler(CommandHandler("help", start_or_help))
+    app.add_handler(CommandHandler('status', status))
+    app.add_handler(CommandHandler("rate", rate))
     # on pressing buttons from inline keyboards
-    dp.add_handler(CallbackQueryHandler(handle_inline_callback))
+    app.add_handler(CallbackQueryHandler(handle_inline_callback))
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(InlineQueryHandler(inlinequery))
+    app.add_handler(InlineQueryHandler(inline_query_callback))
     # on creating game
-    dp.add_handler(ChosenInlineResultHandler(chose_inline_result))
+    app.add_handler(ChosenInlineResultHandler(chose_inline_result))
     # log all errors
-    dp.add_error_handler(error)
+    app.add_error_handler(error)
 
     # Start the Bot
-    updater.start_polling()
-
-    # Block until the user presses Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
-
+    app.run_polling()
 
 if __name__ == '__main__':
     main()

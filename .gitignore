@@ -3,3 +3,5 @@ mongo_data
 *.pyc
 .env
 mongo_db
+.devenv/
+.devenv.flake.nix

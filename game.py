@@ -75,7 +75,7 @@ class Game:
         self.step = 0
         self.notified = False
 
-    def handle(self, command, update):
+    async def handle(self, command, update):
         # update - callback query update
         query_id = update.callback_query.id
 
@@ -85,14 +85,14 @@ class Game:
 
             if (command == 'player_x') and (self.find_player(update) is None):
 
-                self.chose_player(0, update)
+                await self.chose_player(0, update)
             elif ((command == 'player_o') and
                   (self.find_player(update) is None)):
 
-                self.chose_player(1, update)
+                await self.chose_player(1, update)
 
             else:
-                self.show_message(query_id, 'You are already playing!')
+                await self.show_message(query_id, 'You are already playing!')
 
         elif self.status == WAITING_FOR_PLAYER:
 
@@ -102,27 +102,27 @@ class Game:
 
                 if player == self.get_current_player():
 
-                    self.try_to_make_step(command, update)
+                    await self.try_to_make_step(command, update)
 
                 else:
-                    self.show_message(query_id, 'Hey, it is not your turn!')
+                    await self.show_message(query_id, 'Hey, it is not your turn!')
 
             elif command == 'notify':
 
                 if not self.notified:
-                    self.bot.reply_text(
+                    await self.bot.reply_text(
                         reply_to_message_id=self.id,
                         text=self.get_current_player().username +
                         'make your step.')
 
             else:
-                self.show_message(query_id, 'What are you trying to do?')
+                await self.show_message(query_id, 'What are you trying to do?')
 
         elif self.status == FINISHED or self.status == COMPLETED:
 
-            self.show_message(query_id, 'Game is finished!')
+            await self.show_message(query_id, 'Game is finished!')
 
-    def chose_player(self, id, update):
+    async def chose_player(self, id, update):
 
         query_id = update.callback_query.id
         inline_message_id = update.callback_query.inline_message_id
@@ -132,12 +132,12 @@ class Game:
 
                 self.player_x = Player(update)
                 self.players_count += 1
-                self.show_message(
+                await self.show_message(
                     query_id,
                     'Now you are playing for ' + Emoji.HEAVY_MULTIPLICATION_X)
 
             else:
-                self.show_message(
+                await self.show_message(
                     query_id,
                     'There is somebody who already plays for ' +
                     Emoji.HEAVY_MULTIPLICATION_X)
@@ -148,13 +148,13 @@ class Game:
 
                 self.player_o = Player(update)
                 self.players_count += 1
-                self.show_message(
+                await self.show_message(
                     query_id,
                     'Now you are playing for ' +
                     Emoji.HEAVY_LARGE_CIRCLE)
 
             else:
-                self.show_message(
+                await self.show_message(
                     query_id,
                     'There is somebody who already plays for ' +
                     Emoji.HEAVY_LARGE_CIRCLE)
@@ -162,7 +162,7 @@ class Game:
         if self.players_count == 2:
 
             self.status = WAITING_FOR_PLAYER
-            self.set_message(
+            await self.set_message(
                 inline_message_id,
                 self.get_game_status(),
                 self.get_map())
@@ -183,11 +183,11 @@ class Game:
 
             keyboard = InlineKeyboardMarkup([[player]])
 
-            self.set_keyboard(inline_message_id, keyboard)
+            await self.set_keyboard(inline_message_id, keyboard)
 
-    def set_keyboard(self, inline_message_id, keyboard):
+    async def set_keyboard(self, inline_message_id, keyboard):
 
-        self.bot.editMessageReplyMarkup(reply_markup=keyboard,
+        await self.bot.editMessageReplyMarkup(reply_markup=keyboard,
                                         inline_message_id=inline_message_id)
 
     def is_completed(self, cell):
@@ -215,7 +215,7 @@ class Game:
             return True
         return False
 
-    def try_to_make_step(self, cell, update):
+    async def try_to_make_step(self, cell, update):
         i = int(cell)
         if self.map_[i] == EMPTY_CELL:
             if self.get_current_player() == self.player_x:
@@ -231,18 +231,18 @@ class Game:
                 self.winner = self.get_current_player()
                 self.step += 1
                 self.status = COMPLETED
-                self.show_message(
+                await self.show_message(
                     update.callback_query.id, 'Congratulations! You won!')
             elif self.step == 9:
                 self.status = FINISHED
-                self.show_message(update.callback_query.id, 'Draw!')
+                await self.show_message(update.callback_query.id, 'Draw!')
 
-            self.set_message(
+            await self.set_message(
                 update.callback_query.inline_message_id,
                 self.get_game_status(), self.get_map())
 
         else:
-            self.show_message(
+            await self.show_message(
                 update.callback_query.id,
                 'That cell is already played! Try another one.')
 
@@ -301,15 +301,15 @@ class Game:
 
         return None
 
-    def show_message(self, query_id, message):
+    async def show_message(self, query_id, message):
 
-        self.bot.answerCallbackQuery(query_id, message)
+        await self.bot.answerCallbackQuery(query_id, message)
 
-    def set_message(self, message_id, message, keyboard=None):
+    async def set_message(self, message_id, message, keyboard=None):
         logger.debug('message_id:' + message_id)
         logger.info('setting message:' + message)
 
-        self.bot.editMessageText(
+        await self.bot.editMessageText(
             message, inline_message_id=message_id, reply_markup=keyboard)
 
     def to_json(self):
@@ -344,7 +344,9 @@ class Player:
 
         from_user = update.callback_query.from_user
         self.id = from_user.id
-        self.name = from_user.first_name + ' ' + from_user.last_name
+        self.name = from_user.first_name
+        if from_user.last_name is not None:
+            self.name += ' ' + from_user.last_name
         self.username = '@' + from_user.username
 
     def to_json(self):

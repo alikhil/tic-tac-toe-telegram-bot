@@ -5,6 +5,8 @@ services:
     restart: on-failure
     volumes:
       - ./mongo_db:/data/db
+    ports:
+      - 27017:27017
   bot:
     # build from scratch or use my image
     build:
