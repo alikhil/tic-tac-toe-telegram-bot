@@ -2,7 +2,7 @@ version: "3"
 services:
   mongo:
     image: mongo:latest
-    restart: on-failure
+    restart: always
     volumes:
       - ./mongo_db:/data/db
     ports:
@@ -15,4 +15,4 @@ services:
     environment:
       TOKEN: ${TELEGRAM_BOT_TOKEN}
 
-    restart: on-failure
+    restart: always
