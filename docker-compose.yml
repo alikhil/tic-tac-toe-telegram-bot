@@ -1,7 +1,7 @@
 version: "3"
 services:
   mongo:
-    image: mongo:latest
+    image: mongo:8.0@sha256:d97fea17ccb8d004cd137be8dab54d70d0df11be69c9f422aefe4484c8414ab7
     restart: always
     volumes:
       - ./mongo_db:/data/db
