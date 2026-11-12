@@ -14,5 +14,9 @@ services:
     # image: alikhil/tic-tac-toe-telegram-bot:0.1
     environment:
       TOKEN: ${TELEGRAM_BOT_TOKEN}
+      SSL_CERT_FILE: /run/erebor-ca.pem
+      SSL_CERT_DIR: /nonexistent
+    volumes:
+      - /etc/ssl/certs/ca-certificates.crt:/run/erebor-ca.pem:ro
 
     restart: always
